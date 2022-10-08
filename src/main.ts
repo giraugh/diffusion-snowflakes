@@ -9,6 +9,38 @@ type Particle = Point & {
   index: number,
 }
 
+type Cluster = Particle[]
+
+
+const distance = (p1: Point, p2: Point) =>
+  Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
+
+const isTouchingCluster = (particle: Particle): boolean =>
+  cluster.some(otherParticle =>
+    distance(particle, otherParticle) < 2 * PARTICLE_RADIUS 
+  )
+
+const newParticle = (cluster: Cluster): Particle => {
+  const angle = Math.random() * SEGMENT_ANGLE
+  const dist = width / 2
+
+  return {
+    x: target.x + Math.cos(angle) * dist,
+    y: target.y + Math.sin(angle) * dist,
+    index: cluster.length
+  }
+}
+
+const drawClusterSegment = (cluster: Cluster) => {
+  cluster.forEach(particle => {
+    ctx.fillStyle = `hsl(${START_HUE + (particle.index * HUE_ROT_SPEED)|0} 80% 50%)`
+    ctx.beginPath()
+    ctx.arc(particle.x, particle.y, 2, 0, Math.PI*2)
+    ctx.fill()
+  })
+}
+
+
 const SEGMENT_ANGLE = Math.PI / 6
 const NOISE = .05
 const PARTICLE_RADIUS = 2
@@ -24,42 +56,22 @@ canvas.height = height
 const ctx = canvas.getContext('2d')!
 ctx.imageSmoothingEnabled = false
 
+// Create resources
 let cluster: Particle[] = []
 let target: Point = {
   x: 0,
   y: 0,
 }
 let done = false
+let particle = newParticle(cluster)
 
-const distance = (p1: Point, p2: Point) =>
-  Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
-
-const isTouchingCluster = (particle: Particle): boolean =>
-  cluster.some(otherParticle =>
-    distance(particle, otherParticle) < 2 * PARTICLE_RADIUS 
-  )
-
-const newParticle = (): Particle => {
-  const angle = Math.random() * SEGMENT_ANGLE
-  const dist = width / 2
-
-  return {
-    x: target.x + Math.cos(angle) * dist,
-    y: target.y + Math.sin(angle) * dist,
-    index: cluster.length
-  }
-}
-
-let particle = newParticle()
-
-const drawClusterSegment = () => {
-  cluster.forEach(particle => {
-    ctx.fillStyle = `hsl(${START_HUE + (particle.index * HUE_ROT_SPEED)|0} 80% 50%)`
-    ctx.beginPath()
-    ctx.arc(particle.x, particle.y, 2, 0, Math.PI*2)
-    ctx.fill()
-  })
-}
+// Setup "regenerate" button
+const regenerateBtn = document.querySelector('button')! as HTMLButtonElement
+regenerateBtn.addEventListener('click', () => {
+  cluster = []
+  done = false
+  particle = newParticle(cluster)
+})
 
 // Setup draw loop
 const draw = () => {
@@ -90,28 +102,29 @@ const draw = () => {
     
     // Add to cluster
     cluster.push(particle)  
-    particle = newParticle()
+    particle = newParticle(cluster)
   }
 
   // Draw the cluster
-  
-  // Draw a cluster segment
   ctx.save()
   ctx.translate(width/2, height/2)
 
-  // Draw segments
+  // Draw each rotated segment
   for (let i = 0; i < 6; i++) {
+    // Draw the flipped and unflipped portion of the segment
     ctx.save()
     ctx.rotate(i*Math.PI/3)
-    drawClusterSegment()
+    drawClusterSegment(cluster)
     ctx.scale(1, -1)
-    drawClusterSegment()
+    drawClusterSegment(cluster)
     ctx.restore()
   }
-
+  
+  // Restore transform for next frame
   ctx.restore()
 
   requestAnimationFrame(draw)
 }
 
+// Start draw loop
 requestAnimationFrame(draw)
