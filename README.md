@@ -1,4 +1,6 @@
-# Diffusion Snowflakes
+# ❄️ Diffusion Snowflakes
+
+<img width="300" src="https://user-images.githubusercontent.com/16392483/194703074-6cd16bca-9414-4e37-8632-3574202506a0.png">
 
 Generating snowflakes using diffusion-limited aggregation.
 
