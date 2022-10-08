@@ -40,8 +40,8 @@ const drawClusterSegment = (cluster: Cluster) => {
   })
 }
 
-
-const SEGMENT_ANGLE = Math.PI / 6
+const NUM_SPIKES = 6
+const SEGMENT_ANGLE = Math.PI / NUM_SPIKES
 const NOISE = .05
 const PARTICLE_RADIUS = 2
 const SPEED = .5
@@ -75,10 +75,11 @@ regenerateBtn.addEventListener('click', () => {
 
 // Setup draw loop
 const draw = () => {
-  if (!done) {
-    // Clear screen
-    ctx.clearRect(0, 0, width, height)
+  // Clear screen
+  ctx.clearRect(0, 0, width, height)
 
+  // Render while there is room left
+  if (!done) {
     // Brownian motion until touching
     while (!(particle.x <= target.x+1 || isTouchingCluster(particle))) {
       // Get polar coordinate
@@ -110,10 +111,10 @@ const draw = () => {
   ctx.translate(width/2, height/2)
 
   // Draw each rotated segment
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < NUM_SPIKES; i++) {
     // Draw the flipped and unflipped portion of the segment
     ctx.save()
-    ctx.rotate(i*Math.PI/3)
+    ctx.rotate(i*Math.PI/(NUM_SPIKES/2))
     drawClusterSegment(cluster)
     ctx.scale(1, -1)
     drawClusterSegment(cluster)
